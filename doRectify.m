@@ -52,38 +52,37 @@ function doRectify(img1, img2, calibrated,id)
             
             patch_size = 9;
             if p1(1) - 4 + patch_size < n && p1(2) + 5 + patch_size < m && p2(1) - 4 + patch_size < n && p2(2) + 5 + patch_size < m
-                if p1(1) - 4 != 0 && p1(2) + 5 != 0 && p2(1) - 4  != 0 && p2(2) + 5 != 0
+                if p1(1) - 4 > 0 && p1(2) + 5 > 0 && p2(1) - 4  > 0 && p2(2) + 5 > 0
                     l = imcrop(I1,[p1(1)-4,p1(2)+5,patch_size-1,patch_size-1]);
                     r = imcrop(I2,[p2(1)-4,p2(2)+5,patch_size-1,patch_size-1]);
 
-                    
-                    %[h1,w1,c1] = size(l)
-                    save_path = sprintf('examples/ieu/kitti2015');
-                    if ~exist(save_path, 'dir')
-                        mkdir(save_path);
-                    end
-                    %img_rec0 = sprintf('%s/rec_0.png', save_path);
-                    %img_rec1 = sprintf('%s/rec_1.png', save_path);
-                    test_patch = sprintf('%s/training_%06d_%d.png', save_path,id,i);
-                    if isequal(size(l),[patch_size,patch_size,3]) && isequal(size(r),[patch_size,patch_size,3])
-                        %fprintf("DUNG");
+                else
+                    l = imcrop(I1,[p1(1),p1(2),patch_size-1,patch_size-1]);
+                    r = imcrop(I2,[p2(1),p2(2),patch_size-1,patch_size-1]);                    
+                end
+                save_path = sprintf('examples/ieu/kitti2015');
+                if ~exist(save_path, 'dir')
+                    mkdir(save_path);
+                end
+                test_patch = sprintf('%s/training_%06d_%d.png', save_path,id,i);
+                if isequal(size(l),[patch_size,patch_size,3]) && isequal(size(r),[patch_size,patch_size,3])
+                    %fprintf("DUNG");
 
-                        %a = [l,r];
-                        %a = zeros(1,2,patch_size,patch_size,3);
-                        % a(1,1,:,:,:) = l;
-                        % a(1,2,:,:,:) = r;
-                        % if firstIter == true
-                        %     final = a;
-                        %     firstIter = false;
-                        % else
-                        %     final = cat(1,final,a);
-                        % test = squeeze(a(1,2,:,:,:));
-                        %disp(a);
-                        a = [l r];
-                        imwrite(mat2gray(a), test_patch);
-                        % imwrite(mat2gray(a), img_rec1);
-                        % fprintf("A: %d %d %d %d %d",size(test));
-                    end
+                    %a = [l,r];
+                    %a = zeros(1,2,patch_size,patch_size,3);
+                    % a(1,1,:,:,:) = l;
+                    % a(1,2,:,:,:) = r;
+                    % if firstIter == true
+                    %     final = a;
+                    %     firstIter = false;
+                    % else
+                    %     final = cat(1,final,a);
+                    % test = squeeze(a(1,2,:,:,:));
+                    %disp(a);
+                    a = [l r];
+                    imwrite(mat2gray(a), test_patch);
+                    % imwrite(mat2gray(a), img_rec1);
+                    % fprintf("A: %d %d %d %d %d",size(test));
                 end
             end           
         end
