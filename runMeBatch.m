@@ -35,7 +35,7 @@ for k = 1 : length(subFolders)
         
         Files=dir(fname);
         % Read files
-        for i=0:length(Files)-5 # Discard 5 last files
+        for i=0:length(Files)-5 % Discard 5 last files
             FileNames=Files(k).name;
             %fprintf("TEST %s\n",Files(k).name);
             image_path0 = sprintf('%s%010d.png',fname,i);
