@@ -77,11 +77,11 @@ function final= doRectify(img1, img2, calibrated,id,name,pname)
                     r = imcrop(I2,[p2(1),p2(2),patch_size-1,patch_size-1]);                    
                 end
                 
-                # Convert to grayscale
+                % Convert to grayscale
                 l = double(rgb2gray(l));
                 r = double(rgb2gray(r));
                 
-                # Normalize data to zero mean
+                % Normalize data to zero mean
                 l = (l - mean2(l))/ (std2(l) + 1e-10);
                 r = (r - mean2(r))/ (std2(r) + 1e-10);
                 % disp(l);
