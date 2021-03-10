@@ -60,11 +60,9 @@ function final= doRectify(img1, img2, calibrated,id,name,pname)
         a = zeros(size(ml,2),2,patch_size,patch_size);
 
         for i = 1:size(ml,2)
-            %fprintf("DAT VU %d",i)
             p1 = round(ml(:,i));
             p2 = round(mr(:,i));
             
-            %fprintf("TOA DO: %d %d \n",p1(1),p1(2));
             % Create patch
             [m,n,d] = size(I1);
             
@@ -90,10 +88,9 @@ function final= doRectify(img1, img2, calibrated,id,name,pname)
                 if ~exist(save_path, 'dir')
                     mkdir(save_path);
                 end
-                %name = 'TrainSeq03';
-                % disp(l);
+                
                 test_patch = sprintf('%s/%s_%010d_%d.png', save_path,name,id,i);
-                if isequal(size(l),[patch_size,patch_size,3]) && isequal(size(r),[patch_size,patch_size,3])
+                if isequal(size(l),[patch_size,patch_size]) && isequal(size(r),[patch_size,patch_size])
                     % If we want to save images to folder
 %                     a = [l r];
 %                     imwrite(a,test_patch);
