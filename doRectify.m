@@ -105,12 +105,7 @@ function final= doRectify(img1, img2, calibrated,id,name,pname)
                         else
                             final = cat(1,final,c);
                         end
-                    end
-
-                end
-            end           
-        end
-        
-    end
-    
+               end
+         end
+   end           
 end
