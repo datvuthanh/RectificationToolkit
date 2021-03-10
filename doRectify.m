@@ -1,4 +1,4 @@
-function doRectify(img1, img2, calibrated,id)
+function final= doRectify(img1, img2, calibrated,id,name,pname)
    %DORECTIFY Epipolar rectification outermost wrapper
    %
    % img1 and img2 are the filenames of the two images to be rectified
@@ -18,7 +18,21 @@ function doRectify(img1, img2, calibrated,id)
    
     I1 = imread(img1); [a1,b1,~] = fileparts(img1);
     I2 = imread(img2); [a2,b2,~] = fileparts(img2);
-    
+
+    % Grayscale
+    % I3 = double(imread(img1));
+    % I4 = double(imread(img2));
+
+    % I3 = rgb2gray(I3);
+    % I4 = rgb2gray(I4);
+
+    % %imshow(I3);
+
+    % I3 = (I3 - mean2(I3))/ (std2(I3));
+    % I4 = (I4 - mean2(I4))/ (std2(I4));
+
+    %disp(I3);
+    %fprintf("I3 : %f \n",I3(1:2));
     % if calibrated
     if calibrated && exist([a1,'/',b1,'.pm'],'file') == 2  &&...
             exist([a2,'/',b2,'.pm'],'file') == 2
@@ -40,6 +54,10 @@ function doRectify(img1, img2, calibrated,id)
         
         % Dat Vu
         firstIter = true;
+        patch_size = 9;
+  
+        % Create matrix here
+        a = zeros(size(ml,2),2,patch_size,patch_size);
 
         for i = 1:size(ml,2)
             %fprintf("DAT VU %d",i)
@@ -50,66 +68,52 @@ function doRectify(img1, img2, calibrated,id)
             % Create patch
             [m,n,d] = size(I1);
             
-            patch_size = 9;
             if p1(1) - 4 + patch_size < n && p1(2) + 5 + patch_size < m && p2(1) - 4 + patch_size < n && p2(2) + 5 + patch_size < m
                 if p1(1) - 4 > 0 && p1(2) + 5 > 0 && p2(1) - 4  > 0 && p2(2) + 5 > 0
                     l = imcrop(I1,[p1(1)-4,p1(2)+5,patch_size-1,patch_size-1]);
                     r = imcrop(I2,[p2(1)-4,p2(2)+5,patch_size-1,patch_size-1]);
-
                 else
                     l = imcrop(I1,[p1(1),p1(2),patch_size-1,patch_size-1]);
                     r = imcrop(I2,[p2(1),p2(2),patch_size-1,patch_size-1]);                    
                 end
-                save_path = sprintf('examples/ieu/kitti2015');
+                
+                # Convert to grayscale
+                l = double(rgb2gray(l));
+                r = double(rgb2gray(r));
+                
+                # Normalize data to zero mean
+                l = (l - mean2(l))/ (std2(l) + 1e-10);
+                r = (r - mean2(r))/ (std2(r) + 1e-10);
+                % disp(l);
+
+                save_path = sprintf('examples/0103/%s',pname);
                 if ~exist(save_path, 'dir')
                     mkdir(save_path);
                 end
-                test_patch = sprintf('%s/training_%06d_%d.png', save_path,id,i);
+                %name = 'TrainSeq03';
+                % disp(l);
+                test_patch = sprintf('%s/%s_%010d_%d.png', save_path,name,id,i);
                 if isequal(size(l),[patch_size,patch_size,3]) && isequal(size(r),[patch_size,patch_size,3])
-                    %fprintf("DUNG");
+                    % If we want to save images to folder
+%                     a = [l r];
+%                     imwrite(a,test_patch);
+                    
+                        c = zeros(1,2,patch_size,patch_size);
+                        c(1,1,:,:) = l;
+                        c(1,2,:,:) = r;
+    
+                        if firstIter == true
+                            final = c;
+                            firstIter = false;
+                        else
+                            final = cat(1,final,c);
+                        end
+                    end
 
-                    %a = [l,r];
-                    %a = zeros(1,2,patch_size,patch_size,3);
-                    % a(1,1,:,:,:) = l;
-                    % a(1,2,:,:,:) = r;
-                    % if firstIter == true
-                    %     final = a;
-                    %     firstIter = false;
-                    % else
-                    %     final = cat(1,final,a);
-                    % test = squeeze(a(1,2,:,:,:));
-                    %disp(a);
-                    a = [l r];
-                    imwrite(mat2gray(a), test_patch);
-                    % imwrite(mat2gray(a), img_rec1);
-                    % fprintf("A: %d %d %d %d %d",size(test));
                 end
             end           
         end
-        %fprintf("A: %d %d %d %d %d",size(final));
-
-        %%
-        [H1,H2, K] = rectifyF(ml, mr, [size(I1,2),size(I1,1)] );
-
-        % transform left and right points
-        mlx = htx(H1,ml); mrx = htx(H2,mr);
-        
-        % Sampson error wrt to F=skew([1 0 0])
-        err = sqrt(sum(F_sampson(skew([1 0 0]),mlx,mrx).^2)/(length(mlx)-1));
-        fprintf('Rectification Sampson RMSE: %0.5g pixel \n',err);
-         
-        % projective MPP (Euclidean only if K is guessed right)
-        % Pn1=[K,[0;0;0]]; Pn2=[K,[1;0;0]];
         
     end
-    
-%    [I1r,I2r, bb1, bb2] = imrectify(I1,I2,H1,H2,'crop');
-    % [I1r,I2r, bb1, bb2] = imrectify(I1,I2,H1,H2,'valid');
-    
-    % % xshift =  bb1(1)  - bb2(1)
-    
-    % % fix the MPP after centering
-    % Pn1 = [1 0 -bb1(1);  0 1 -bb1(2); 0 0 1] *Pn1;
-    % Pn2 = [1 0 -bb2(1);  0 1 -bb2(2); 0 0 1] *Pn2;
     
 end
